@@ -33,7 +33,7 @@ the "Important" note below).
 6. Full API reference (auth details, rate limits, endpoints): [app.raynet.cz/api/doc](https://app.raynet.cz/api/doc/).
 
 ## Installation
-- Clone the repository: git clone https://github.com/clastr96/rcrm.git
+- Clone the repository: git clone https://github.com/sajf/raynet-csv-importer.git
 - Navigate to the project directory: cd raynet-crm
 - Copy **.env.example** to **.env** and fill in **RCRM_API_KEY**, **RCRM_API_USERNAME**, **RCRM_API_INSTANCENAME**
   (see above), **RCRM_API_EMAIL_TO** and **SPRING_MAIL_PASSWORD**. `.env` is git-ignored and is the only place
