@@ -1,20 +1,20 @@
-version: '1'
-
 services:
   mysql:
     image: mysql/mysql-server
     container_name: my_sql_container
-    environment:
-      - MYSQL_ROOT_PASSWORD=secret
-      - MYSQL_DATABASE=raynet_crm
-      - MYSQL_USER=raynet_app_user
-      - MYSQL_PASSWORD=raynet_app_password
+    env_file:
+      - .env
     ports:
       - "3306:3306"
     networks:
       - my_network
     volumes:
       - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
 
   spring-boot-app:
     build:
@@ -23,12 +23,11 @@ services:
     container_name: spring-boot-app
     ports:
       - "8080:8080"
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/raynet_crm
-      SPRING_DATASOURCE_USERNAME: raynet_app_user
-      SPRING_DATASOURCE_PASSWORD: raynet_app_password
+    env_file:
+      - .env
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     networks:
       - my_network
 
