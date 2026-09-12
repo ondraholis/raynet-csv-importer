@@ -47,7 +47,11 @@ public class ClientServiceImplTest {
     void testCreateClient() {
         // Given
         Client expectedClient = new Client();
-        when(clientRepository.save(any(Client.class))).thenReturn(expectedClient);
+        expectedClient.setRegNumber("123456789");
+        expectedClient.setTitle("Test Client");
+        expectedClient.setEmail("test@example.com");
+        expectedClient.setPhone("123-456-7890");
+        when(clientRepository.save(expectedClient)).thenReturn(expectedClient);
 
         // When
         Client createdClient = clientService.createClient(createClientCsvBean("123456789", "Test Client", "test@example.com", "123-456-7890"));
@@ -55,7 +59,6 @@ public class ClientServiceImplTest {
         // Then
         assertNotNull(createdClient);
         assertEquals(expectedClient, createdClient);
-        verify(clientRepository).save(any(Client.class));
     }
 
     @Test
