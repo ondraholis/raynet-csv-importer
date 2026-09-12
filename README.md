@@ -6,6 +6,7 @@ RaynetCRM is a Java application for importing client data from CSV files into a 
 - Process client data and update existing clients or create new ones in the CRM system
 - Asynchronous processing for improved performance
 - Integration with external CRM system via REST API
+- API-key authentication protecting the upload endpoint
 
 ## Requirements
 - Gradle
@@ -36,8 +37,9 @@ the "Important" note below).
 - Clone the repository: git clone https://github.com/sajf/raynet-csv-importer.git
 - Navigate to the project directory: cd raynet-crm
 - Copy **.env.example** to **.env** and fill in **RCRM_API_KEY**, **RCRM_API_USERNAME**, **RCRM_API_INSTANCENAME**
-  (see above), **RCRM_API_EMAIL_TO** and **SPRING_MAIL_PASSWORD**. `.env` is git-ignored and is the only place
-  secrets/credentials should live — do not put them back into `application.properties` or `docker-compose.yml`.
+  (see above), **RCRM_API_EMAIL_TO**, **SPRING_MAIL_PASSWORD** and **IMPORT_API_KEY**. `.env` is git-ignored and is
+  the only place secrets/credentials should live — do not put them back into `application.properties` or
+  `docker-compose.yml`.
 - **Important:** the app calls the real Raynet CRM API once on startup (to read the initial rate limit) before it
   will accept any requests. Without a valid `RCRM_API_KEY`/`RCRM_API_INSTANCENAME` for an actual Raynet instance, the
   application **fails to start**, both in Docker and when run locally — see [Local development](#local-development)
@@ -61,11 +63,26 @@ You don't need to run the whole stack in Docker to work on the app:
   API (`https://app.raynet.cz/api/v2/`) and shouldn't be changed — the app requires valid credentials for a real
   Raynet instance to start, see [Getting Raynet CRM access and an API key](#getting-raynet-crm-access-and-an-api-key).
 
+## Authentication
+
+The `/uploadData` endpoint is protected by a static API key. Set the key via the **IMPORT_API_KEY** environment
+variable (backed by the `security.api-key` property); it is required on every request through the **`X-API-Key`**
+header. The application **fails to start** when the key is blank, so the endpoint can never be exposed
+unauthenticated. Requests without a valid key are rejected with **401 Unauthorized**.
+
+Because the key is a bearer secret, always call the endpoint over TLS in production and keep the key in `.env`
+(or a secret manager), never in source control.
+
 ## Usage
 - Prepare your client data in a CSV file with the following format:
 regNumber;title;email;phone
 123456;Example Company;example@example.com;123-456-7890
-- Call the **localhost:8080/uploadData** endpoint with the csv file as a request body
+- Call the **localhost:8080/uploadData** endpoint with the csv file as a request body, sending your API key in the
+  `X-API-Key` header, e.g.:
+
+```
+curl -F 'file=@clients.csv;type=text/csv' -H "X-API-Key: $IMPORT_API_KEY" http://localhost:8080/uploadData
+```
 - The application will process the CSV file asynchronously, updating existing clients or creating new ones in the CRM system
 - Not processed clients (after rate limit hit) will be processed in hourly scheduled job
 
