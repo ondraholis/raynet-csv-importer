@@ -38,9 +38,9 @@ public class ClientServiceImpl implements ClientService {
         List<Client> updatedClients = new ArrayList<>();
 
         for (Client client : clientsToUpdate) {
-            client.setTitle(client.getTitle());
-            client.setEmail(client.getEmail());
-            client.setPhone(client.getPhone());
+            client.setTitle(clientCsvBean.getTitle());
+            client.setEmail(clientCsvBean.getEmail());
+            client.setPhone(clientCsvBean.getPhone());
             updatedClients.add(clientRepository.save(client));
         }
         return updatedClients;
