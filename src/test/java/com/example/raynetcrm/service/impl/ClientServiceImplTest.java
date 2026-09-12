@@ -12,7 +12,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
@@ -46,14 +49,8 @@ public class ClientServiceImplTest {
         Client expectedClient = new Client();
         when(clientRepository.save(any(Client.class))).thenReturn(expectedClient);
 
-        ClientCsvBean clientCsvBean = new ClientCsvBean();
-        clientCsvBean.setRegNumber("123456789");
-        clientCsvBean.setTitle("Test Client");
-        clientCsvBean.setEmail("test@example.com");
-        clientCsvBean.setPhone("123-456-7890");
-
         // When
-        Client createdClient = clientService.createClient(clientCsvBean);
+        Client createdClient = clientService.createClient(createClientCsvBean("123456789", "Test Client", "test@example.com", "123-456-7890"));
 
         // Then
         assertNotNull(createdClient);
@@ -71,18 +68,21 @@ public class ClientServiceImplTest {
         when(clientRepository.findAllByRegNumber(anyString())).thenReturn(clientsToUpdate);
         when(clientRepository.save(any(Client.class))).thenReturn(expectedClient);
 
-        ClientCsvBean clientCsvBean = new ClientCsvBean();
-        clientCsvBean.setRegNumber("123456789");
-        clientCsvBean.setTitle("Updated Client");
-        clientCsvBean.setEmail("updated@example.com");
-        clientCsvBean.setPhone("987-654-3210");
-
         // When
-        List<Client> updatedClients = clientService.updateClient(clientCsvBean);
+        List<Client> updatedClients = clientService.updateClient(createClientCsvBean("123456789", "Updated Client", "updated@example.com", "987-654-3210"));
 
         // Then
         assertFalse(updatedClients.isEmpty());
         assertEquals(expectedClient, updatedClients.getFirst());
         verify(clientRepository).save(any(Client.class));
+    }
+
+    private ClientCsvBean createClientCsvBean(String regNumber, String title, String email, String phone) {
+        ClientCsvBean bean = new ClientCsvBean();
+        bean.setRegNumber(regNumber);
+        bean.setTitle(title);
+        bean.setEmail(email);
+        bean.setPhone(phone);
+        return bean;
     }
 }
